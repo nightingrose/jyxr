@@ -1,3 +1,4 @@
+using Game.Core.Affix;
 using Game.Core.Definitions;
 using Game.Core.Model;
 using Game.Core.Model.Character;
@@ -30,6 +31,19 @@ public sealed class InventoryService
         var entry = Inventory.AddItem(item, quantity);
         _session.Events.Publish(new InventoryChangedEvent());
         _session.Events.Publish(new ItemAcquiredEvent(item.Id, item.Name, quantity));
+        return entry;
+    }
+
+    public InventoryEntry AddEquipmentInstance(
+        EquipmentDefinition equipment,
+        IReadOnlyList<AffixDefinition>? extraAffixes = null)
+    {
+        ArgumentNullException.ThrowIfNull(equipment);
+
+        var instance = EquipmentInstanceFactory.Create(equipment, extraAffixes);
+        var entry = Inventory.AddEquipmentInstance(instance);
+        _session.Events.Publish(new InventoryChangedEvent());
+        _session.Events.Publish(new ItemAcquiredEvent(equipment.Id, equipment.Name, 1));
         return entry;
     }
 

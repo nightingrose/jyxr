@@ -356,9 +356,25 @@ public sealed class SpecialBattleService
                 continue;
             }
 
-            _session.InventoryService.AddItem(reward.ContentId);
+            GrantTowerRewardItem(reward.ContentId);
             AddTowerRewardClaimIfNeeded(reward);
         }
+    }
+
+    private void GrantTowerRewardItem(string itemId)
+    {
+        var item = _session.ContentRepository.GetItem(itemId);
+        if (item is EquipmentDefinition equipment)
+        {
+            var extraAffixes = OrdinaryBattleLootGenerator
+                .GenerateEquipmentRolls(equipment, _session.ContentRepository, State.Adventure.Round)
+                .SelectMany(static roll => roll.Affixes)
+                .ToArray();
+            _session.InventoryService.AddEquipmentInstance(equipment, extraAffixes);
+            return;
+        }
+
+        _session.InventoryService.AddItem(item);
     }
 
     private void AddTowerRewardClaimIfNeeded(PendingTowerReward reward)

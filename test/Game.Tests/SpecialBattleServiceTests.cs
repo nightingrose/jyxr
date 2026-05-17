@@ -42,7 +42,36 @@ public sealed class SpecialBattleServiceTests
         Assert.Empty(session.State.SpecialBattle.TowerRewardClaimCounts);
     }
 
-    private static GameSession CreateSession(TowerDefinition tower, params ItemDefinition[] items)
+    [Fact]
+    public async Task TowerEquipmentRewardsAreGrantedAsRandomAffixInstances()
+    {
+        var reward = TestContentFactory.CreateEquipment("rare_sword");
+        var tower = CreateSingleStageTower(reward.Id);
+        var session = CreateSession(
+            tower,
+            [reward],
+            [CreateRandomAffixTable()]);
+        var host = new TowerRuntimeHost(
+            [["hero"]],
+            [true]);
+
+        await session.SpecialBattleService.RunTowerAsync(host);
+
+        var entry = Assert.Single(session.State.Inventory.Entries.OfType<EquipmentInstanceInventoryEntry>());
+        Assert.Equal(reward.Id, entry.Equipment.Definition.Id);
+        Assert.NotEmpty(entry.Equipment.ExtraAffixes);
+        Assert.Empty(session.State.Inventory.Entries.OfType<StackInventoryEntry>());
+    }
+
+    private static GameSession CreateSession(
+        TowerDefinition tower,
+        params ItemDefinition[] items) =>
+        CreateSession(tower, items, []);
+
+    private static GameSession CreateSession(
+        TowerDefinition tower,
+        ItemDefinition[] items,
+        EquipmentRandomAffixTableDefinition[] equipmentRandomAffixTables)
     {
         var heroDefinition = TestContentFactory.CreateCharacterDefinition("hero");
         var allyDefinition = TestContentFactory.CreateCharacterDefinition("ally");
@@ -58,9 +87,21 @@ public sealed class SpecialBattleServiceTests
                 CreateBattle("battle_a"),
                 CreateBattle("battle_b"),
             ],
-            towers: [tower]);
+            towers: [tower],
+            equipmentRandomAffixTables: equipmentRandomAffixTables);
         return new GameSession(state, repository);
     }
+
+    private static TowerDefinition CreateSingleStageTower(string rewardId) =>
+        new()
+        {
+            Id = "tower",
+            Name = "tower",
+            Stages =
+            [
+                CreateStage("stage_a", "battle_a", rewardId, 0),
+            ],
+        };
 
     private static TowerDefinition CreateTwoStageTower(string rewardId) =>
         new()
@@ -111,6 +152,22 @@ public sealed class SpecialBattleServiceTests
             Name = id,
             Type = ItemType.Consumable,
             CanDrop = true,
+        };
+
+    private static EquipmentRandomAffixTableDefinition CreateRandomAffixTable() =>
+        new()
+        {
+            MinItemLevel = 1,
+            MaxItemLevel = 99,
+            Options =
+            [
+                new EquipmentRandomAffixOptionDefinition
+                {
+                    Kind = EquipmentRandomAffixKind.Accuracy,
+                    Weight = 1,
+                    Ranges = [new EquipmentRandomAffixRangeDefinition(1, 1)],
+                },
+            ],
         };
 
     private sealed class TowerRuntimeHost : IRuntimeHost, ISpecialBattleRuntimeHost
