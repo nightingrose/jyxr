@@ -20,8 +20,6 @@ public partial class RollStatsPanel : Control
 		_rollButton.Pressed += RollAndSync;
 		_ackButton.Pressed += Submit;
 		_characterPanel.GetNode<Control>("%CloseButton").Hide();
-		_characterPanel.GetNode<Control>("%PrevCharacterButton").Hide();
-		_characterPanel.GetNode<Control>("%NextCharacterButton").Hide();
 	}
 
 	public async Task AwaitRollAsync(string characterId, CancellationToken cancellationToken = default)

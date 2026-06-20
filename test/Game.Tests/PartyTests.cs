@@ -87,35 +87,4 @@ public sealed class PartyTests
         Assert.Throws<InvalidOperationException>(() => party.MoveMember(Party.HeroCharacterId, 1));
     }
 
-    [Fact]
-    public void Party_GetNextMember_WrapsAroundByPartyOrder()
-    {
-        var definition = TestContentFactory.CreateCharacterDefinition("hero");
-        var hero = TestContentFactory.CreateCharacterInstance(Party.HeroCharacterId, definition);
-        var ally = TestContentFactory.CreateCharacterInstance("char_002", definition);
-        var third = TestContentFactory.CreateCharacterInstance("char_003", definition);
-        var party = new Party();
-        party.AddMember(hero);
-        party.AddMember(ally);
-        party.AddMember(third);
-
-        Assert.Same(ally, party.GetNextMember(Party.HeroCharacterId));
-        Assert.Same(hero, party.GetNextMember("char_003"));
-    }
-
-    [Fact]
-    public void Party_GetPreviousMember_WrapsAroundByPartyOrder()
-    {
-        var definition = TestContentFactory.CreateCharacterDefinition("hero");
-        var hero = TestContentFactory.CreateCharacterInstance(Party.HeroCharacterId, definition);
-        var ally = TestContentFactory.CreateCharacterInstance("char_002", definition);
-        var third = TestContentFactory.CreateCharacterInstance("char_003", definition);
-        var party = new Party();
-        party.AddMember(hero);
-        party.AddMember(ally);
-        party.AddMember(third);
-
-        Assert.Same(third, party.GetPreviousMember(Party.HeroCharacterId));
-        Assert.Same(hero, party.GetPreviousMember("char_002"));
-    }
 }

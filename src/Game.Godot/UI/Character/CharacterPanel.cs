@@ -42,8 +42,6 @@ public partial class CharacterPanel : JyPanel
 	private JyButton _talentButton = null!;
 	private JyButton _skillButton = null!;
 	private JyButton _biographyButton = null!;
-	private JyButton _prevCharacterButton = null!;
-	private JyButton _nextCharacterButton = null!;
 	private readonly List<IDisposable> _subscriptions = [];
 
 	public override void _Ready()
@@ -68,8 +66,6 @@ public partial class CharacterPanel : JyPanel
 		_talentButton = GetNode<JyButton>("%TalentButton");
 		_skillButton = GetNode<JyButton>("%SkillButton");
 		_biographyButton = GetNode<JyButton>("%BiographyButton");
-		_prevCharacterButton = GetNode<JyButton>("%PrevCharacterButton");
-		_nextCharacterButton = GetNode<JyButton>("%NextCharacterButton");
 		_skillTab.IsInteractive = true;
 
 		_attrButton.Pressed += () => ShowTab(0);
@@ -77,8 +73,6 @@ public partial class CharacterPanel : JyPanel
 		_skillButton.Pressed += () => ShowTab(2);
 		_talentButton.Pressed += () => ShowTab(3);
 		_biographyButton.Pressed += () => ShowTab(4);
-		_prevCharacterButton.Pressed += () => SwitchCharacter(-1);
-		_nextCharacterButton.Pressed += () => SwitchCharacter(1);
 		_skillTab.SkillToggleRequested += OnSkillToggleRequested;
 		_skillTab.SkillDetailRequested += OnSkillDetailRequested;
 		_subscriptions.Add(Game.Session.Events.Subscribe<CharacterChangedEvent>(OnCharacterChanged));
@@ -123,7 +117,6 @@ public partial class CharacterPanel : JyPanel
 		var combatStats = CharacterCombatStatFormatter.Calculate(character);
 		_attackValueLabel.Text = combatStats.Attack.ToString();
 		_defenceValueLabel.Text = combatStats.Defence.ToString();
-		UpdateNavigationButtons();
 
 		_attributeTab.Setup(character);
 		_equipmentTab.Setup(character);
@@ -167,27 +160,6 @@ public partial class CharacterPanel : JyPanel
 		}
 
 		Render();
-	}
-
-	private void SwitchCharacter(int direction)
-	{
-		var party = Game.State.Party;
-		if (party.Members.Count <= 1)
-		{
-			return;
-		}
-
-		CharacterId = direction < 0
-			? party.GetPreviousMember(CharacterId).Id
-			: party.GetNextMember(CharacterId).Id;
-		Render();
-	}
-
-	private void UpdateNavigationButtons()
-	{
-		var hasMultipleMembers = Game.State.Party.Members.Count > 1;
-		_prevCharacterButton.Disabled = !hasMultipleMembers;
-		_nextCharacterButton.Disabled = !hasMultipleMembers;
 	}
 
 	private static string FormatExperienceProgress(CharacterInstance character)

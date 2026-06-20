@@ -12,8 +12,6 @@
 [ext_resource type="Texture2D" uid="uid://burcoa7lhsxxo" path="res://assets/art/ui/character_panel/renwuzhuangtai_tianfu.png" id="10_talent_button"]
 [ext_resource type="Texture2D" uid="uid://du67x404pgcg3" path="res://assets/art/ui/character_panel/renwuzhuangtai_liezhuang.png" id="11_biography_button"]
 [ext_resource type="PackedScene" uid="uid://b1hd7sr7biah0" path="res://scenes/ui/base/jy_button.tscn" id="12_button"]
-[ext_resource type="Texture2D" uid="uid://bme7m3xaidyeo" path="res://assets/art/ui/character_panel/nav_prev.svg" id="13_prev_nav"]
-[ext_resource type="Texture2D" uid="uid://fehul5q0per7" path="res://assets/art/ui/character_panel/nav_next.svg" id="14_next_nav"]
 [ext_resource type="PackedScene" uid="uid://cnvfko4652fdb" path="res://scenes/ui/character_panel/attribute_tab.tscn" id="15_attribute_tab"]
 [ext_resource type="PackedScene" uid="uid://bcmomxyksiwp8" path="res://scenes/ui/character_panel/talent_tab.tscn" id="16_talent_tab"]
 [ext_resource type="PackedScene" path="res://scenes/ui/skill_tab/skill_tab.tscn" id="17_skill_tab"]
@@ -62,26 +60,6 @@ offset_bottom = 513.7993
 scale = Vector2(1.0947978, 1.0947978)
 texture = ExtResource("6_avatar_frame")
 expand_mode = 1
-
-[node name="PrevCharacterButton" parent="ContentRoot/AvatarBox" index="2" unique_id=1378105116 instance=ExtResource("12_button")]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 24.0
-offset_top = 206.0
-offset_right = 124.0
-offset_bottom = 306.0
-texture_normal = ExtResource("13_prev_nav")
-stretch_mode = 0
-
-[node name="NextCharacterButton" parent="ContentRoot/AvatarBox" index="3" unique_id=1062137731 instance=ExtResource("12_button")]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 596.0
-offset_top = 206.0
-offset_right = 696.0
-offset_bottom = 306.0
-texture_normal = ExtResource("14_next_nav")
-stretch_mode = 0
 
 [node name="Labels" type="Control" parent="ContentRoot" parent_id_path=PackedInt32Array(196658441) index="1" unique_id=686035826]
 anchors_preset = 0
@@ -222,20 +200,20 @@ stretch_mode = 0
 [node name="SkillButton" parent="ContentRoot/Buttons" index="2" unique_id=1557070536 instance=ExtResource("12_button")]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 1267.0
-offset_top = 175.0
-offset_right = 1477.0
-offset_bottom = 385.0
+offset_left = 1075.0
+offset_top = 104.0
+offset_right = 1285.0
+offset_bottom = 314.0
 texture_normal = ExtResource("9_skill_button")
 stretch_mode = 0
 
 [node name="TalentButton" parent="ContentRoot/Buttons" index="3" unique_id=2089298929 instance=ExtResource("12_button")]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 1075.0
-offset_top = 104.0
-offset_right = 1285.0
-offset_bottom = 314.0
+offset_left = 1267.0
+offset_top = 175.0
+offset_right = 1477.0
+offset_bottom = 385.0
 texture_normal = ExtResource("10_talent_button")
 stretch_mode = 0
 
@@ -299,3 +277,7 @@ offset_bottom = 1067.0
 [node name="QuickPartyContainer" type="HBoxContainer" parent="ContentRoot/ScrollContainer" index="0" unique_id=1744764174]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="CloseButton" parent="." index="3" unique_id=962603895]
+PressOffset = Vector2(2, 2)
+PressColor = Color(0.8, 0.8, 0.8, 1)

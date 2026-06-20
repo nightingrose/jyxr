@@ -20,7 +20,7 @@ public partial class UIRoot : Control
 	public PackedScene PartyPanelScene { get; set; } = null!;
 
 	[Export]
-	public PackedScene CharacterPanelScene { get; set; } = null!;
+	public PackedScene CharacterRosterPanelScene { get; set; } = null!;
 
 	[Export]
 	public PackedScene InventoryPanelScene { get; set; } = null!;
@@ -196,15 +196,15 @@ public partial class UIRoot : Control
 
 	public Control ShowPartyPanel() => ShowMainPanel(PartyPanelScene, "party panel");
 
-	public Control ShowCharacterPanel(string characterId) =>
-		ShowPopupPanel(CharacterPanelScene, "character panel", panel =>
+	public Control ShowCharacterRosterPanel(string characterId) =>
+		ShowPopupPanel(CharacterRosterPanelScene, "character roster panel", panel =>
 		{
-			if (panel is not CharacterPanel characterPanel)
+			if (panel is not CharacterRosterPanel characterRosterPanel)
 			{
-				throw new InvalidOperationException("Character panel scene root must be CharacterPanel.");
+				throw new InvalidOperationException("Character roster panel scene root must be CharacterRosterPanel.");
 			}
 
-			characterPanel.CharacterId = characterId;
+			characterRosterPanel.CharacterId = characterId;
 		});
 
 	public Control ShowInventoryPanel() => ShowMainPanel(InventoryPanelScene, "inventory panel");

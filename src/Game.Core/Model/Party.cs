@@ -47,10 +47,6 @@ public sealed class Party
 
     public CharacterInstance GetMember(string characterId) => _members[characterId];
 
-    public CharacterInstance GetNextMember(string characterId) => GetRelativeMember(characterId, 1);
-
-    public CharacterInstance GetPreviousMember(string characterId) => GetRelativeMember(characterId, -1);
-
     public bool MoveMember(string characterId, int targetIndex)
     {
         if (!_members.TryGetValue(characterId, out var character))
@@ -85,29 +81,6 @@ public sealed class Party
         _members.Remove(characterId);
         _members.Insert(targetIndex, characterId, character);
         return true;
-    }
-
-    private CharacterInstance GetRelativeMember(string characterId, int offset)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(characterId);
-        if (_members.Count == 0)
-        {
-            throw new InvalidOperationException("Party is empty.");
-        }
-
-        if (!_members.ContainsKey(characterId))
-        {
-            throw new InvalidOperationException($"Character '{characterId}' is not in the party.");
-        }
-
-        var currentIndex = _members.IndexOf(characterId);
-        if (currentIndex < 0)
-        {
-            throw new InvalidOperationException($"Character '{characterId}' is not in the party.");
-        }
-
-        var targetIndex = (currentIndex + offset % _members.Count + _members.Count) % _members.Count;
-        return _members.GetAt(targetIndex).Value;
     }
 
     public bool MoveToMembers(string characterId) => MoveExisting(characterId, PartyPlacement.Member);

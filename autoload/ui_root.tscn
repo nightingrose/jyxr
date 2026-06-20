@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://b26rtcod4xv7t" path="res://src/Game.Godot/UI/UIRoot.cs" id="1_ui_root"]
 [ext_resource type="Script" path="res://src/Game.Godot/UI/Detail/DetailPanelHost.cs" id="2_detail_host"]
 [ext_resource type="PackedScene" uid="uid://jon61teprdc7" path="res://scenes/ui/party_panel/party_panel.tscn" id="2_party_panel"]
-[ext_resource type="PackedScene" uid="uid://c7xwca038g3px" path="res://scenes/ui/character_panel/character_panel.tscn" id="3_i0hgf"]
+[ext_resource type="PackedScene" path="res://scenes/ui/character_panel/character_roster_panel.tscn" id="3_i0hgf"]
 [ext_resource type="PackedScene" uid="uid://beqsxw0hmqwm" path="res://scenes/ui/story/story_dialogue_panel.tscn" id="4_story_dialogue"]
 [ext_resource type="PackedScene" uid="uid://0gybacdn8xd4" path="res://scenes/ui/story/story_choice_panel.tscn" id="5_story_choice"]
 [ext_resource type="PackedScene" uid="uid://bnk146v0yfw02" path="res://scenes/ui/hud/hud.tscn" id="6_hud"]
@@ -38,7 +38,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_ui_root")
 PartyPanelScene = ExtResource("2_party_panel")
-CharacterPanelScene = ExtResource("3_i0hgf")
+CharacterRosterPanelScene = ExtResource("3_i0hgf")
 InventoryPanelScene = ExtResource("12_inventory_panel")
 GameLogPanelScene = ExtResource("7_journal")
 HeroPanelScene = ExtResource("8_hero_panel")

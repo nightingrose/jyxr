@@ -79,7 +79,7 @@ public partial class PartyPanel : JyPanel
 
 	private void OnCharacterSelected(string characterId)
 	{
-		UIRoot.Instance.ShowCharacterPanel(characterId);
+		UIRoot.Instance.ShowCharacterRosterPanel(characterId);
 	}
 
 	private void OnCharacterMoveRequested(string characterId, int targetIndex)
