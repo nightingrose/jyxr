@@ -1,6 +1,5 @@
 using Game.Application;
 using Game.Core.Definitions;
-using Game.Godot.Assets;
 using Game.Godot.Persistence;
 using Game.Godot.UI;
 using Godot;
@@ -9,8 +8,6 @@ namespace Game.Godot.Map;
 
 public partial class MapScreen : Control
 {
-	private const float LargeMapXScale = 2.4f;
-	private const float LargeMapYScale = 1.8f;
 	private readonly LocalSaveStore _saveStore = new();
 	private MapEnterResult? _pendingInitialResult;
 	private bool _isHandlingInteraction;
@@ -26,13 +23,10 @@ public partial class MapScreen : Control
 
 	private Control _mapBigTab = null!;
 	private Control _mapSmallTab = null!;
-	private Control _cloud = null!;
-	private Control _mapEntitySlots = null!;
 	private Control _cameraButton = null!;
 	private HBoxContainer _mapEntityList = null!;
 	private Control _bottomBox = null!;
 	private RichTextLabel _mapDescriptionLabel = null!;
-	private Control _mapPin = null!;
 	private TextureRect _pinAvatar = null!;
 	private MapInteractionResult? _pendingInteraction;
 	private bool _isStoryPresentationActive;
@@ -41,13 +35,11 @@ public partial class MapScreen : Control
 	{
 		_mapBigTab = GetNode<Control>("%MapBigTab");
 		_mapSmallTab = GetNode<Control>("%MapSmallTab");
-		_cloud = GetNode<Control>("%Cloud");
-		_mapEntitySlots = GetNode<Control>("%MapEntitySlots");
+		InitializeLargeMapNodes();
 		_cameraButton = GetNode<Control>("%CameraButton");
 		_mapEntityList = GetNode<HBoxContainer>("%MapEntityList");
 		_bottomBox = GetNode<Control>("%BottomBox");
 		_mapDescriptionLabel = GetNode<RichTextLabel>("%MapDescriptionLabel");
-		_mapPin = GetNode<Control>("%MapPin");
 		_pinAvatar = GetNode<TextureRect>("%PinAvatar");
 
 		if (_pendingInitialResult is not null)
@@ -101,7 +93,6 @@ public partial class MapScreen : Control
 
 	private void Apply(MapEnterResult result)
 	{
-		World.Instance.SetBackground(result.Map.Picture);
 		if (result.Map.Musics.Any())
 		{
 			Game.Audio.PlayBgm(result.Map.Musics);
@@ -111,12 +102,14 @@ public partial class MapScreen : Control
 
 		if (result.Map.Kind == MapKind.Large)
 		{
+			World.Instance.SetBackground(null);
 			_mapBigTab.Show();
 			_mapSmallTab.Hide();
 			FillLargeMap(result);
 		}
 		else
 		{
+			World.Instance.SetBackground(result.Map.Picture);
 			_mapBigTab.Hide();
 			_mapSmallTab.Show();
 			FillSmallMap(result);
@@ -124,27 +117,6 @@ public partial class MapScreen : Control
 
 		ApplyStoryPresentationVisibility();
 		AutoSaveIfEnabled();
-	}
-
-	private void FillLargeMap(MapEnterResult result)
-	{
-		ClearChildren(_mapEntitySlots);
-
-		foreach (var location in result.Locations)
-		{
-			var button = CreateEntityButton(MapEntitySlotScene, location);
-			if (location.Location.Position is { } position)
-			{
-				button.Position = new Vector2(position.X * LargeMapXScale, position.Y * LargeMapYScale);
-			}
-
-			_mapEntitySlots.AddChild(button);
-		}
-
-		if (result.HeroPosition is { } heroPosition)
-		{
-			_mapPin.Position = new Vector2(heroPosition.X * LargeMapXScale, heroPosition.Y * LargeMapYScale);
-		}
 	}
 
 	private void FillSmallMap(MapEnterResult result)

@@ -69,7 +69,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Cloud" type="TextureRect" parent="MapBigTab" unique_id=1116946840]
+[node name="LargeMapViewportContainer" type="SubViewportContainer" parent="MapBigTab" unique_id=325343108]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -77,30 +77,42 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
+stretch = true
+
+[node name="LargeMapViewport" type="SubViewport" parent="MapBigTab/LargeMapViewportContainer" unique_id=1723798081]
+unique_name_in_owner = true
+size = Vector2i(1920, 1080)
+
+[node name="LargeMapWorld" type="Node2D" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport" unique_id=1640377946]
+unique_name_in_owner = true
+
+[node name="LargeMapBackground" type="Sprite2D" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld" unique_id=1143418225]
+unique_name_in_owner = true
+centered = false
+
+[node name="Cloud" type="TextureRect" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld" unique_id=1116946840]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
 mouse_filter = 2
 texture = ExtResource("4_cloud")
 expand_mode = 1
 stretch_mode = 1
 
-[node name="Control" type="Control" parent="MapBigTab" unique_id=325343108]
-anchors_preset = 0
-offset_left = -15.0
-offset_top = -52.0
-offset_right = -15.0
-offset_bottom = -52.0
-
-[node name="MapEntitySlots" type="Control" parent="MapBigTab/Control" unique_id=356276484]
+[node name="MapEntitySlots" type="Control" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld" unique_id=356276484]
 unique_name_in_owner = true
 anchors_preset = 0
 
-[node name="MapPin" type="Control" parent="MapBigTab/Control" unique_id=1444961703]
+[node name="MapPin" type="Control" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld" unique_id=1444961703]
 unique_name_in_owner = true
 anchors_preset = 0
 offset_right = 76.0
 offset_bottom = 75.0
 mouse_filter = 2
 
-[node name="PinAvatar" type="TextureRect" parent="MapBigTab/Control/MapPin" unique_id=1626363249]
+[node name="PinAvatar" type="TextureRect" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld/MapPin" unique_id=1626363249]
 unique_name_in_owner = true
 layout_mode = 0
 offset_right = 76.0
@@ -110,10 +122,14 @@ texture = ExtResource("7_pin_avatar")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="MapBigTab/Control/MapPin" unique_id=1840084638]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld/MapPin" unique_id=1840084638]
 libraries/ = SubResource("AnimationLibrary_pin")
 autoplay = &"default"
 
+[node name="LargeMapCamera" type="Camera2D" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport/LargeMapWorld" unique_id=439006118]
+unique_name_in_owner = true
+position = Vector2(960, 540)
+enabled = true
 [node name="MapSmallTab" type="Control" parent="." unique_id=1873506715]
 unique_name_in_owner = true
 layout_mode = 1
