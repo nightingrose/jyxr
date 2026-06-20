@@ -3,7 +3,6 @@ using Game.Core.Definitions;
 using Game.Core.Model;
 using Game.Core.Model.Skills;
 using Godot;
-using Game.Godot.Assets;
 using Game.Godot.Map;
 using Game.Godot.Persistence;
 using Game.Godot.UI.Battle;
@@ -272,13 +271,19 @@ public partial class UIRoot : Control
 		ArgumentException.ThrowIfNullOrWhiteSpace(battleId);
 		ArgumentNullException.ThrowIfNull(forbiddenCharacterIds);
 
+		var battle = Game.ContentRepository.GetBattle(battleId);
+		if (CountPlayerDeploySlots(battle) == 0)
+		{
+			return Array.Empty<string>();
+		}
+
 		if (CombatantSelectPanelScene.Instantiate() is not CombatantSelectPanel panel)
 		{
 			throw new InvalidOperationException("Combatant select panel scene root must be CombatantSelectPanel.");
 		}
 
 		ModalLayer.AddChild(panel);
-		panel.Configure(Game.ContentRepository.GetBattle(battleId), forbiddenCharacterIds);
+		panel.Configure(battle, forbiddenCharacterIds);
 		return await panel.AwaitDeploymentAsync(cancellationToken);
 	}
 
@@ -443,6 +448,12 @@ public partial class UIRoot : Control
 	}
 
 	private static IReadOnlySet<string> EmptyForbiddenSet { get; } = new HashSet<string>(StringComparer.Ordinal);
+
+	private static int CountPlayerDeploySlots(BattleDefinition battle) =>
+		battle.Participants.Count(participant =>
+			participant.Team == Game.Config.BattlePlayerTeam &&
+			participant.PartyIndex is not null &&
+			participant.CharacterId is null);
 
 	private async Task<bool> ShowBattleScreenCoreAsync(
 		Action<BattleScreen> configure,

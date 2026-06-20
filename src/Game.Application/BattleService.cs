@@ -177,7 +177,13 @@ public sealed class BattleService
                 participant.Facing));
         }
 
-        return new BattleState(new BattleGrid(GridWidth, GridHeight), units);
+        var state = new BattleState(new BattleGrid(GridWidth, GridHeight), units);
+        if (!state.Units.Any(unit => unit.Team == PlayerTeam))
+        {
+            throw new InvalidOperationException($"Battle '{battle.Id}' must contain at least one player team unit.");
+        }
+
+        return state;
     }
 
     public OrdinaryBattleVictorySettlement PreviewOrdinaryVictorySettlement(
