@@ -9,6 +9,7 @@ public partial class BattleLegendOverlay : Control
 	private static readonly Vector2 DesignSize = new(1920f, 1080f);
 	private static readonly StringName LegendIntroAnimationName = new("legend_intro");
 
+	private Control _effectRoot = null!;
 	private Control _designRoot = null!;
 	private TextureRect _portrait = null!;
 	private Label _skillNameLabel = null!;
@@ -17,20 +18,21 @@ public partial class BattleLegendOverlay : Control
 
 	public override void _Ready()
 	{
+		_effectRoot = GetNode<Control>("%EffectRoot");
 		_designRoot = GetNode<Control>("%DesignRoot");
 		_portrait = GetNode<TextureRect>("%Portrait");
 		_skillNameLabel = GetNode<Label>("%SkillNameLabel");
 		_effectView = GetNode<BattleSkillView>("%EffectView");
 		_legendAnimationPlayer = GetNode<AnimationPlayer>("%LegendAnimationPlayer");
-		ApplyDesignScale();
+		ApplyResponsiveScale();
 	}
 
 	public override void _Notification(int what)
 	{
 		base._Notification(what);
-		if (what == NotificationResized && _designRoot is not null)
+		if (what == NotificationResized && _designRoot is not null && _effectRoot is not null)
 		{
-			ApplyDesignScale();
+			ApplyResponsiveScale();
 		}
 	}
 
@@ -53,16 +55,25 @@ public partial class BattleLegendOverlay : Control
 		QueueFree();
 	}
 
-	private void ApplyDesignScale()
+	private void ApplyResponsiveScale()
 	{
-		var scale = Math.Min(Size.X / DesignSize.X, Size.Y / DesignSize.Y);
-		if (scale <= 0f)
+		var designScale = Math.Min(Size.X / DesignSize.X, Size.Y / DesignSize.Y);
+		if (designScale <= 0f)
 		{
-			scale = 1f;
+			designScale = 1f;
 		}
 
 		_designRoot.PivotOffset = DesignSize * 0.5f;
-		_designRoot.Scale = new Vector2(scale, scale);
+		_designRoot.Scale = new Vector2(designScale, designScale);
+
+		var effectScale = new Vector2(Size.X / DesignSize.X, Size.Y / DesignSize.Y);
+		if (effectScale.X <= 0f || effectScale.Y <= 0f)
+		{
+			effectScale = Vector2.One;
+		}
+
+		_effectRoot.PivotOffset = DesignSize * 0.5f;
+		_effectRoot.Scale = effectScale;
 	}
 
 	private async Task PlaySceneAnimationAsync()
