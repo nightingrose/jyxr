@@ -159,7 +159,7 @@ public partial class MapScreen
 			sourcePosition.X / LargeMapSourceWidth * _largeMapWorldSize.X,
 			sourcePosition.Y / LargeMapSourceHeight * _largeMapWorldSize.Y);
 
-	public override void _Input(InputEvent @event)
+	public override void _UnhandledInput(InputEvent @event)
 	{
 		if (!_mapBigTab.Visible || _isStoryPresentationActive)
 		{
