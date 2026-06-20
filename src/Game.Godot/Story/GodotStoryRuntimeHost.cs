@@ -225,8 +225,7 @@ public sealed class GodotStoryRuntimeHost : IRuntimeHost, ISpecialBattleRuntimeH
 	[StoryCommand("gameover")]
 	private ValueTask ExecuteGameOverAsync()
 	{
-		Game.ProfileService.AddDeaths();
-		UIRoot.Instance.ShowGameOverScreen();
+		GameFlow.GameOver();
 		return ValueTask.CompletedTask;
 	}
 

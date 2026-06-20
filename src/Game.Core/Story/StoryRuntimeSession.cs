@@ -8,6 +8,8 @@ internal sealed class StoryRuntimeSession(
     string? startSegment,
     CancellationToken cancellationToken)
 {
+    private const string GameOverCommand = "gameover";
+
     private readonly IReadOnlyDictionary<string, Segment> _segments =
         script.Segments.ToDictionary(segment => segment.Name, StringComparer.Ordinal);
 
@@ -179,6 +181,15 @@ internal sealed class StoryRuntimeSession(
         var selectedOutcome = await host.ResolveBattleAsync(context, ct);
         if (!battle.Outcomes.TryGetValue(selectedOutcome, out var steps))
         {
+            if (selectedOutcome == BattleOutcome.Lose)
+            {
+                var args = Array.Empty<ExprValue>();
+                await host.ExecuteCommandAsync(GameOverCommand, args, ct);
+                yield return StepResult.FromEvent(new BattleResolvedEvent(context, selectedOutcome));
+                yield return StepResult.FromEvent(new CommandExecutedEvent(GameOverCommand, args));
+                yield break;
+            }
+
             throw new StoryRuntimeException(
                 $"Battle '{battle.BattleId}' resolved to '{selectedOutcome}', but the script does not define that outcome.");
         }

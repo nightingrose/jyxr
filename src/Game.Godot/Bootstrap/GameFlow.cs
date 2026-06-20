@@ -38,6 +38,12 @@ public static class GameFlow
 		}
 	}
 
+	public static void GameOver()
+	{
+		Game.ProfileService.AddDeaths();
+		UIRoot.Instance.ShowGameOverScreen();
+	}
+
 	private static async Task StartOpeningStoryAsync(CancellationToken cancellationToken)
 	{
 		UIRoot.Instance.ClosePanel();

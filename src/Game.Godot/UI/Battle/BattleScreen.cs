@@ -65,6 +65,7 @@ public partial class BattleScreen : Control
 	private bool _isResolvingSkillPresentation;
 	private bool _isEndingBattle;
 	private bool _isSpeedUpEnabled;
+	private bool? _battleResult;
 	private double _initialTimeScale = 1d;
 	private int _battleSpeedMultiplier = 2;
 	private SkillPresentationContext? _activeSkillPresentation;
@@ -215,6 +216,7 @@ public partial class BattleScreen : Control
 		ApplyBattleSettings(_settingsStore.LoadOrDefault());
 		_logLines.Clear();
 		_isEndingBattle = false;
+		_battleResult = null;
 		AppendLog($"战斗开始：{_battleDefinition.Name}");
 		_uiState.WaitTimeline();
 		RefreshAll();
@@ -1231,6 +1233,7 @@ public partial class BattleScreen : Control
 		}
 
 		_isEndingBattle = true;
+		_battleResult = isWin;
 		_uiState.EndBattle();
 		AppendLog(isWin ? "战斗胜利。" : "战斗失败。");
 		OrdinaryBattleVictorySettlement? settlement = null;
@@ -1261,14 +1264,12 @@ public partial class BattleScreen : Control
 
 	private void FinishBattle()
 	{
-		if (_state is null)
+		if (_battleResult is not { } battleResult)
 		{
-			QueueFree();
-			return;
+			throw new InvalidOperationException("Battle result has not been resolved.");
 		}
 
-		var playerAlive = _state.Units.Any(unit => unit.Team == PlayerTeam && unit.IsAlive);
-		if (_battleCompletion.TrySetResult(playerAlive))
+		if (_battleCompletion.TrySetResult(battleResult))
 		{
 			QueueFree();
 		}

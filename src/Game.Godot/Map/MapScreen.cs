@@ -273,7 +273,11 @@ public partial class MapScreen : Control
 		}
 
 		var selected = await UIRoot.Instance.ShowCombatantSelectPanelAsync(battleId);
-		await UIRoot.Instance.ShowBattleScreenAsync(battleId, selected);
+		var isWin = await UIRoot.Instance.ShowBattleScreenAsync(battleId, selected);
+		if (!isWin)
+		{
+			GameFlow.GameOver();
+		}
 	}
 
 	private async Task RunStoryAsync(string? storyId)
