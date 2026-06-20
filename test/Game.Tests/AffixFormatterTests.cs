@@ -20,6 +20,7 @@ public sealed class AffixFormatterTests
         {
             Id = "talent_001",
             Name = "孤独求败",
+            Description = "站在武林巅峰，几乎洞悉一切敌人的弱点。",
         };
         var externalSkill = TestContentFactory.CreateExternalSkill("skill_001");
         externalSkill = externalSkill with { Name = "松风剑法" };
@@ -66,7 +67,7 @@ public sealed class AffixFormatterTests
         Assert.Equal("集气速度提高5%", AffixFormatter.FormatCn(
             new StatModifierAffix(StatType.Speed, ModifierValue.Increase(0.05)),
             repository));
-        Assert.Equal("天赋「孤独求败」", AffixFormatter.FormatCn(
+        Assert.Equal("天赋「孤独求败」\n站在武林巅峰，几乎洞悉一切敌人的弱点。", AffixFormatter.FormatCn(
             new GrantTalentAffix("talent_001"),
             repository));
         Assert.Equal("时装「独孤求败」", AffixFormatter.FormatCn(
@@ -96,11 +97,12 @@ public sealed class AffixFormatterTests
                 {
                     Id = "talent_001",
                     Name = "北冥神功",
+                    Description = "攻击带有吸取大量内力效果。",
                 }
             ]);
 
         Assert.Equal(
-            "天赋「北冥神功」",
+            "天赋「北冥神功」\n攻击带有吸取大量内力效果。",
             AffixFormatter.FormatCn(
                 new SkillAffixDefinition(new GrantTalentAffix("talent_001")),
                 repository));
@@ -110,7 +112,7 @@ public sealed class AffixFormatterTests
                 new SkillAffixDefinition(new StatModifierAffix(StatType.Attack, ModifierValue.Add(8)), 10),
                 repository));
         Assert.Equal(
-            "10级解锁，装备生效：天赋「北冥神功」",
+            "10级解锁，装备生效：天赋「北冥神功」\n攻击带有吸取大量内力效果。",
             AffixFormatter.FormatCn(
                 new SkillAffixDefinition(new GrantTalentAffix("talent_001"), 10, true),
                 repository));
@@ -126,6 +128,7 @@ public sealed class AffixFormatterTests
                 {
                     Id = "talent_001",
                     Name = "心眼通明",
+                    Description = "看破破绽。",
                 }
             ]);
 
@@ -137,7 +140,7 @@ public sealed class AffixFormatterTests
             repository);
 
         Assert.Equal(
-            ["攻击力 +10", "天赋「心眼通明」"],
+            ["攻击力 +10", "天赋「心眼通明」\n看破破绽。"],
             lines);
     }
 
@@ -214,7 +217,7 @@ public sealed class AffixFormatterTests
 
         var internalSkill = repository.GetInternalSkill("北冥神功");
         Assert.Equal(
-            "10级解锁，装备生效：天赋「北冥神功」",
+            "10级解锁，装备生效：天赋「北冥神功」\n攻击带有吸取大量内力效果。",
             AffixFormatter.FormatCn(internalSkill.Affixes[0], repository));
 
         var externalSkill = repository.GetExternalSkill("野球拳");

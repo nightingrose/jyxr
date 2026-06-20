@@ -23,6 +23,7 @@ public sealed class SkillDescriptionFormatterTests
         {
             Id = "battle_focus",
             Name = "战意高昂",
+            Description = "越战越勇。",
         };
         var skill = TestContentFactory.CreateExternalSkill(
             "songfeng",
@@ -68,7 +69,7 @@ public sealed class SkillDescriptionFormatterTests
         Assert.Contains("[color=red]技能CD 1/2[/color]", text, StringComparison.Ordinal);
         Assert.Contains("[color=yellow]适性:阳20%[/color]", text, StringComparison.Ordinal);
         Assert.Contains("[color=yellow]特效：流血(2)[/color] [color=yellow]持续3回合[/color] [color=yellow]命中概率:75%[/color]", text, StringComparison.Ordinal);
-        Assert.Contains("[color=green](√)(3级解锁)天赋「战意高昂」[/color]", text, StringComparison.Ordinal);
+        Assert.Contains("[color=green](√)(3级解锁)天赋「战意高昂」\n越战越勇。[/color]", text, StringComparison.Ordinal);
         Assert.Contains("[color=red](×)(5级解锁)攻击力 +10，暴击率 +2%[/color]", text, StringComparison.Ordinal);
         Assert.Contains("[color=red](×)(12级解锁)???[/color]", text, StringComparison.Ordinal);
     }
@@ -106,6 +107,7 @@ public sealed class SkillDescriptionFormatterTests
         {
             Id = "beiming",
             Name = "北冥神功",
+            Description = "攻击带有吸取大量内力效果。",
         };
         var skill = TestContentFactory.CreateInternalSkill(
             "beiming_internal",
@@ -140,7 +142,7 @@ public sealed class SkillDescriptionFormatterTests
         Assert.Contains("[color=yellow]+爆发 20%[/color]", text, StringComparison.Ordinal);
         Assert.Contains("[color=cyan]阴适性 60[/color]", text, StringComparison.Ordinal);
         Assert.Contains("[color=yellow]阳适性 48[/color]", text, StringComparison.Ordinal);
-        Assert.Contains("[color=green](√)(10级解锁)装备生效：天赋「北冥神功」[/color]", text, StringComparison.Ordinal);
+        Assert.Contains("[color=green](√)(10级解锁)装备生效：天赋「北冥神功」\n攻击带有吸取大量内力效果。[/color]", text, StringComparison.Ordinal);
     }
 
     [Fact]

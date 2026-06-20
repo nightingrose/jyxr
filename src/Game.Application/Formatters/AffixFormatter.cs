@@ -25,7 +25,7 @@ public static class AffixFormatter
         {
             StatModifierAffix statModifier => $"{FormatterTextCn.GetStatNameCn(statModifier.Stat)}{FormatStatModifierValueCn(statModifier.Stat, statModifier.Value)}",
             BuffLevelStatModifierAffix buffLevelStatModifier => FormatBuffLevelStatModifierCn(buffLevelStatModifier),
-            GrantTalentAffix grantTalent => $"天赋「{FormatterTextCn.ResolveTalentName(grantTalent.TalentId, contentRepository)}」",
+            GrantTalentAffix grantTalent => FormatGrantTalentCn(grantTalent, contentRepository),
             GrantModelAffix grantModel => $"时装「{GetModelDisplayText(grantModel)}」",
             SkillBonusModifierAffix skillBonus => $"技能「{FormatterTextCn.ResolveSkillName(skillBonus.SkillId, contentRepository)}」威力{FormatModifierValueCn(skillBonus.Value, new ValueDisplaySpec(ValueDisplayKind.Percentage, 100))}",
             WeaponBonusModifierAffix weaponBonus => $"{FormatterTextCn.GetWeaponTypeNameCn(weaponBonus.WeaponType)}类武功威力{FormatModifierValueCn(weaponBonus.Value, new ValueDisplaySpec(ValueDisplayKind.Percentage, 100))}",
@@ -99,6 +99,19 @@ public static class AffixFormatter
         ArgumentNullException.ThrowIfNull(contentRepository);
 
         return affixes.Select(affix => FormatCn(affix, contentRepository)).ToList();
+    }
+
+    private static string FormatGrantTalentCn(GrantTalentAffix affix, IContentRepository contentRepository)
+    {
+        if (!contentRepository.TryGetTalent(affix.TalentId, out var talent))
+        {
+            return $"天赋「{affix.TalentId}」";
+        }
+
+        var line = $"天赋「{talent.Name}」";
+        return string.IsNullOrWhiteSpace(talent.Description)
+            ? line
+            : $"{line}\n{talent.Description.Trim()}";
     }
 
     private static string GetModelDisplayText(GrantModelAffix affix) =>
