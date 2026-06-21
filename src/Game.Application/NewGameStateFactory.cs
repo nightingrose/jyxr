@@ -54,6 +54,7 @@ public sealed class NewGameStateFactory
         var state = new GameState();
         state.SetAdventure(adventure);
         state.SetParty(party);
+        state.Location.SetLargeMapPosition("大地图", _config.DefaultLargeMapPosition);
         state.SetChest(chest ?? new ChestState());
         state.SetEquipmentInstanceFactory(equipmentInstanceFactory);
         state.SetCurrency(currency);

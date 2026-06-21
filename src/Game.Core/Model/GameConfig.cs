@@ -25,6 +25,7 @@ public sealed class GameConfig
 	public int BattlePlayerTeam { get; init; } = 1;
 	public double BattleGoldDropChance { get; init; } = 0.005d;
 	public double OrdinaryBattleDropChance { get; init; } = 0.1d;
+	public MapPosition DefaultLargeMapPosition { get; init; } = new(447, 383);
 	public string InitialStorySegmentId { get; init; } = "开局答题";
 
 	public List<string> RandomBattleMusics { get; init; } = [
