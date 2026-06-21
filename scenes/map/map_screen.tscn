@@ -89,6 +89,7 @@ unique_name_in_owner = true
 layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
+mouse_filter = 1
 
 [node name="LargeMapWorld" type="Node2D" parent="MapBigTab/LargeMapViewportContainer/LargeMapViewport" unique_id=1640377946]
 unique_name_in_owner = true
