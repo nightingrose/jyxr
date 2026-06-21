@@ -3,8 +3,15 @@ using Game.Core.Abstractions;
 using Game.Core.Model;
 using Game.Core.Persistence;
 using Game.Godot.Audio;
+using Godot;
 
 namespace Game.Godot;
+
+public enum GameClientPlatformKind
+{
+	Desktop,
+	Mobile
+}
 
 public static class Game
 {
@@ -77,6 +84,9 @@ public static class Game
 	public static MapService MapService => Session.MapService;
 	public static StoryService StoryService => Session.StoryService;
 	public static AudioManager Audio => AudioManager.Instance;
+	public static GameClientPlatformKind ClientPlatform => ResolveClientPlatform();
+	public static bool IsDesktopPlatform => ClientPlatform == GameClientPlatformKind.Desktop;
+	public static bool IsMobilePlatform => ClientPlatform == GameClientPlatformKind.Mobile;
 
 	public static void Initialize(
 		GameSession initialSession,
@@ -105,5 +115,18 @@ public static class Game
 		{
 			throw new InvalidOperationException("Game has not been initialized.");
 		}
+	}
+
+	private static GameClientPlatformKind ResolveClientPlatform()
+	{
+		if (OS.HasFeature("android") ||
+			OS.HasFeature("ios") ||
+			OS.HasFeature("web_android") ||
+			OS.HasFeature("web_ios"))
+		{
+			return GameClientPlatformKind.Mobile;
+		}
+
+		return GameClientPlatformKind.Desktop;
 	}
 }

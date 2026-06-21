@@ -80,6 +80,16 @@ public sealed class MapService
         return ResolveMapEvent(location.Event, consumedTimeSlots);
     }
 
+    public int PreviewInteractionConsumedTimeSlots((string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex) location)
+    {
+        if (location.Event is null)
+        {
+            return 0;
+        }
+
+        return CalculateMoveConsumedTimeSlots(location.MapId, location.Location) + 1;
+    }
+
     private IReadOnlyList<(string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex)> BuildLocations(MapDefinition map)
     {
         var locations = new List<(string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex)>(map.Locations.Count);
@@ -124,23 +134,33 @@ public sealed class MapService
 
     private int MoveHeroIfNeeded((string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex) location)
     {
-        if (location.Location.Position is not { } targetPosition ||
-            ContentRepository.GetMap(location.MapId).Kind != MapKind.Large)
-        {
-            return 0;
-        }
-
-        var currentPosition = State.Location.TryGetLargeMapPosition(location.MapId, out var position)
-            ? position
-            : MapPosition.Zero;
-        var consumedTimeSlots = (int)(currentPosition.DistanceTo(targetPosition) / 10d);
+        var consumedTimeSlots = CalculateMoveConsumedTimeSlots(location.MapId, location.Location);
         if (consumedTimeSlots > 0)
         {
             State.Clock.AdvanceTimeSlots(consumedTimeSlots);
         }
 
-        State.Location.SetLargeMapPosition(location.MapId, targetPosition);
+        if (location.Location.Position is { } targetPosition &&
+            ContentRepository.GetMap(location.MapId).Kind == MapKind.Large)
+        {
+            State.Location.SetLargeMapPosition(location.MapId, targetPosition);
+        }
+
         return consumedTimeSlots;
+    }
+
+    private int CalculateMoveConsumedTimeSlots(string mapId, MapLocationDefinition location)
+    {
+        if (location.Position is not { } targetPosition ||
+            ContentRepository.GetMap(mapId).Kind != MapKind.Large)
+        {
+            return 0;
+        }
+
+        var currentPosition = State.Location.TryGetLargeMapPosition(mapId, out var position)
+            ? position
+            : MapPosition.Zero;
+        return (int)(currentPosition.DistanceTo(targetPosition) / 10d);
     }
 
     private MapInteractionResult ChangeMapFromEvent(string targetMapId, int consumedTimeSlots)
