@@ -203,7 +203,12 @@ public partial class MapScreen : Control
 				OpenChest();
 				return;
 			case MapService.MapInteractionOutcome.BattleRequested:
-				await OpenBattleAsync(result.TargetId);
+				var isWin = await OpenBattleAsync(result.TargetId);
+				if (isWin && GodotObject.IsInstanceValid(this))
+				{
+					World.Instance.RefreshCurrentMap();
+				}
+
 				return;
 			case MapService.MapInteractionOutcome.PlaceholderInteraction:
 			case MapService.MapInteractionOutcome.Blocked:
@@ -265,7 +270,7 @@ public partial class MapScreen : Control
 		UIRoot.Instance.ShowChestPanel();
 	}
 
-	private static async Task OpenBattleAsync(string? battleId)
+	private static async Task<bool> OpenBattleAsync(string? battleId)
 	{
 		if (string.IsNullOrWhiteSpace(battleId))
 		{
@@ -277,7 +282,10 @@ public partial class MapScreen : Control
 		if (!isWin)
 		{
 			GameFlow.GameOver();
+			return false;
 		}
+
+		return true;
 	}
 
 	private async Task RunStoryAsync(string? storyId)
