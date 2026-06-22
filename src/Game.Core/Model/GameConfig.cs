@@ -17,6 +17,7 @@ public sealed class GameConfig
 	public int MaxExternalSkillCount { get; init; } = 12;
 	public int MaxInternalSkillCount { get; init; } = 8;
 	public int MaxAttribute { get; init; } = 300;
+	public ItemRequirementStatSource ItemRequirementStatSource { get; init; } = ItemRequirementStatSource.Final;
 	public int MaxExternalSkillLevel { get; init; } = 20;
 	public int MaxInternalSkillLevel { get; init; } = 20;
 	public int MaxHpMp { get; init; } = 10000;
@@ -74,4 +75,10 @@ public sealed class GameConfig
 		"橙色灯戒", "铂金戒指", "蓝宝戒指", "水晶护符", "魔神信物", "神奇戒指",
 	];
 	public List<string> InitialPartyCharacterIds { get; init; } = ["主角"];
+}
+
+public enum ItemRequirementStatSource
+{
+	Final,
+	Base,
 }

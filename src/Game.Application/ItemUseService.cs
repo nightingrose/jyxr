@@ -243,14 +243,14 @@ public sealed class ItemUseService
             effect is AddMaxHpItemUseEffectDefinition ||
             effect is AddMaxMpItemUseEffectDefinition);
 
-    private static string? ValidateRequirements(ItemDefinition item, CharacterInstance target)
+    private string? ValidateRequirements(ItemDefinition item, CharacterInstance target)
     {
         foreach (var requirement in item.Requirements)
         {
             switch (requirement)
             {
                 case StatItemRequirementDefinition stat:
-                    if (target.GetStat(stat.StatId) < stat.Value)
+                    if (ResolveRequirementStatValue(target, stat.StatId) < stat.Value)
                     {
                         return $"需要{FormatStatName(stat.StatId)}达到{stat.Value}";
                     }
@@ -266,6 +266,15 @@ public sealed class ItemUseService
 
         return null;
     }
+
+    private double ResolveRequirementStatValue(CharacterInstance target, StatType statType) =>
+        Config.ItemRequirementStatSource switch
+        {
+            ItemRequirementStatSource.Final => target.GetStat(statType),
+            ItemRequirementStatSource.Base => target.GetBaseStat(statType),
+            _ => throw new InvalidOperationException(
+                $"Unsupported item requirement stat source: {Config.ItemRequirementStatSource}"),
+        };
 
     private string? ValidateSpecificTarget(
         ItemUseKind kind,
