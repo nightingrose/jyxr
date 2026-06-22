@@ -90,6 +90,7 @@ public partial class BattleScreen : Control
 	private HBoxContainer _listContainer = null!;
 	private RichTextLabel _logLabel = null!;
 	private Control _overlayRoot = null!;
+	private ButtonGroup _skillButtonGroup = new();
 	private int PlayerTeam => GameRoot.Config.BattlePlayerTeam;
 
 	public override void _Ready()
@@ -235,7 +236,7 @@ public partial class BattleScreen : Control
 		GameRoot.Audio.PlayBgm(GameRoot.Config.RandomBattleMusics);
 	}
 
-	internal void RefreshAll()
+	internal void RefreshAll(bool refreshList = true)
 	{
 		if (_state is null || !IsInsideTree())
 		{
@@ -254,7 +255,11 @@ public partial class BattleScreen : Control
 		RefreshBoard();
 		RefreshSelectedSkill();
 		RefreshActions();
-		RefreshList();
+		if (refreshList)
+		{
+			RefreshList();
+		}
+
 		RefreshAvatar();
 		RefreshLog();
 		RefreshToggleButtons();
@@ -494,6 +499,7 @@ public partial class BattleScreen : Control
 	private void RefreshList()
 	{
 		ClearChildren(_listContainer);
+		_skillButtonGroup = new ButtonGroup();
 		if (_state is null)
 		{
 			return;
@@ -515,16 +521,11 @@ public partial class BattleScreen : Control
 				AddListLabel(_uiState.SelectedItem is null
 					? "点击高亮目标使用。"
 					: $"使用：{_uiState.SelectedItem.Definition.Name}");
-				AddCancelButton();
 				break;
 			default:
 				foreach (var skillView in GetSkillOptions(actingUnit))
 				{
 					AddSkillButton(skillView);
-				}
-				if (_uiState.Mode is BattleUiMode.SelectingMove or BattleUiMode.SelectingSkillTarget)
-				{
-					AddCancelButton();
 				}
 				break;
 		}
@@ -570,24 +571,19 @@ public partial class BattleScreen : Control
 		}
 
 		button.Setup(skillView.Skill, ReferenceEquals(_uiState.SelectedSkill, skillView.Skill), skillView.IsAvailable);
+		button.ButtonGroup = _skillButtonGroup;
 		button.TooltipText = BuildSkillTooltip(skillView);
 		if (skillView.IsAvailable)
 		{
 			button.Pressed += () =>
 			{
 				_uiState.SelectSkillTarget(skillView.Skill);
-				RefreshAll();
+				RefreshAll(refreshList: false);
 			};
 		}
 
 		_listContainer.AddChild(button);
 	}
-
-	private void AddCancelButton() => AddListButton("取消", () =>
-	{
-		_uiState.ActUnit();
-		RefreshAll();
-	});
 
 	private async Task OpenItemPanelAsync()
 	{

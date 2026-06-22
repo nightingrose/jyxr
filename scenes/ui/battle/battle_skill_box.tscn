@@ -5,6 +5,8 @@
 [ext_resource type="Texture2D" uid="uid://iuhrh668ir72" path="res://assets/art/icon/icon_waigong_150.jpg" id="3_avatar"]
 [ext_resource type="FontFile" uid="uid://dhqmakafvt2fy" path="res://assets/font/行楷简.otf" id="4_font"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_button"]
+
 [sub_resource type="StyleBoxFlat" id="2_selected"]
 draw_center = false
 border_width_left = 4
@@ -39,27 +41,20 @@ font_color = Color(1, 0, 0, 1)
 outline_size = 3
 outline_color = Color(0, 0, 0, 1)
 
-[node name="BattleSkillBox" type="TextureButton" unique_id=1951422030]
-custom_minimum_size = Vector2(180, 270)
+[node name="BattleSkillBox" type="Button" unique_id=1951422030]
+custom_minimum_size = Vector2(180, 260)
 offset_right = 180.0
-offset_bottom = 270.0
+offset_bottom = 260.0
 mouse_filter = 1
-ignore_texture_size = true
-stretch_mode = 5
+theme_override_styles/normal = SubResource("StyleBoxEmpty_button")
+theme_override_styles/pressed = SubResource("2_selected")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_button")
+theme_override_styles/hover_pressed = SubResource("2_selected")
+theme_override_styles/disabled = SubResource("StyleBoxEmpty_button")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_button")
+toggle_mode = true
 script = ExtResource("1_script")
 TooltipScene = ExtResource("2_tooltip")
-
-[node name="SelectedFrame" type="Panel" parent="." unique_id=1521652100]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-theme_override_styles/panel = SubResource("2_selected")
 
 [node name="Panel" type="Panel" parent="." unique_id=1260509028]
 layout_mode = 0

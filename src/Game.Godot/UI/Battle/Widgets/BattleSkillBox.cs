@@ -5,7 +5,7 @@ using Godot;
 
 namespace Game.Godot.UI.Battle;
 
-public partial class BattleSkillBox : TextureButton
+public partial class BattleSkillBox : Button
 {
 	private static readonly Color DisabledModulate = new(0.35f, 0.35f, 0.35f, 0.95f);
 
@@ -15,18 +15,15 @@ public partial class BattleSkillBox : TextureButton
 	private TextureRect _avatar = null!;
 	private Label _nameLabel = null!;
 	private Label _formNameLabel = null!;
-	private Panel _selectedFrame = null!;
 
 	private SkillInstance? _skill;
 	private bool _available = true;
-	private bool _selected;
 
 	public override void _Ready()
 	{
 		_avatar = GetNode<TextureRect>("%Avatar");
 		_nameLabel = GetNode<Label>("%NameLabel");
 		_formNameLabel = GetNode<Label>("%FormNameLabel");
-		_selectedFrame = GetNode<Panel>("%SelectedFrame");
 		Refresh();
 	}
 
@@ -35,7 +32,7 @@ public partial class BattleSkillBox : TextureButton
 		ArgumentNullException.ThrowIfNull(skill);
 		_skill = skill;
 		_available = available;
-		_selected = selected;
+		SetPressedNoSignal(selected);
 		TooltipText = skill.Name;
 		Refresh();
 	}
@@ -63,7 +60,6 @@ public partial class BattleSkillBox : TextureButton
 			return;
 		}
 
-		_selectedFrame.Visible = _selected;
 		Disabled = !_available;
 		MouseDefaultCursorShape = _available
 			? CursorShape.PointingHand
