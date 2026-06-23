@@ -50,6 +50,9 @@ public partial class UIRoot : Control
 	public PackedScene BattleScreenScene { get; set; } = null!;
 
 	[Export]
+	public PackedScene RefinementEquipmentSelectionPanelScene { get; set; } = null!;
+
+	[Export]
 	public PackedScene SelectSectScreenScene { get; set; } = null!;
 
 	[Export]
@@ -316,6 +319,22 @@ public partial class UIRoot : Control
 		return await ShowBattleScreenCoreAsync(
 			screen => screen.Configure(request),
 			cancellationToken);
+	}
+
+	public async Task<EquipmentInstanceInventoryEntry?> ShowRefinementEquipmentSelectionPanelAsync(
+		IReadOnlyList<EquipmentInstanceInventoryEntry> entries,
+		CancellationToken cancellationToken = default)
+	{
+		ArgumentNullException.ThrowIfNull(entries);
+
+		if (RefinementEquipmentSelectionPanelScene.Instantiate() is not RefinementEquipmentSelectionPanel panel)
+		{
+			throw new InvalidOperationException("Refinement equipment selection panel scene root must be RefinementEquipmentSelectionPanel.");
+		}
+
+		ModalLayer.AddChild(panel);
+		panel.Configure(entries);
+		return await panel.AwaitSelectionAsync(cancellationToken);
 	}
 
 	public async Task<SectDefinition> ShowSelectSectScreenAsync(CancellationToken cancellationToken = default)

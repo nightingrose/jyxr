@@ -6,7 +6,7 @@ using Godot;
 
 namespace Game.Godot.Story;
 
-public sealed class GodotStoryRuntimeHost : IRuntimeHost, ISpecialBattleRuntimeHost
+public sealed class GodotStoryRuntimeHost : IRuntimeHost, ISpecialBattleRuntimeHost, IApplicationRuntimeHost
 {
 	private readonly StoryCommandBinder _binder;
 
@@ -59,6 +59,14 @@ public sealed class GodotStoryRuntimeHost : IRuntimeHost, ISpecialBattleRuntimeH
 			selectedCharacterIds,
 			cancellationToken);
 		return isWin ? BattleOutcome.Win : BattleOutcome.Lose;
+	}
+
+	public async ValueTask<EquipmentInstanceInventoryEntry?> SelectRefinementEquipmentAsync(
+		IReadOnlyList<EquipmentInstanceInventoryEntry> entries,
+		CancellationToken cancellationToken)
+	{
+		ArgumentNullException.ThrowIfNull(entries);
+		return await UIRoot.Instance.ShowRefinementEquipmentSelectionPanelAsync(entries, cancellationToken);
 	}
 
 	public async ValueTask<IReadOnlyList<string>> SelectCombatantsAsync(

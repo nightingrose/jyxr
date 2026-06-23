@@ -42,13 +42,13 @@ public sealed class EquipmentRefinementService
             return StoryCommandResult.Jump(NoEquipmentStoryId);
         }
 
-        var equipmentIndex = await ChooseAsync(
-            host,
-            "主角",
-            "选择要洗练的装备",
-            equipmentEntries.Select(FormatEquipmentOption).ToArray(),
-            cancellationToken);
-        var equipment = equipmentEntries[equipmentIndex].Equipment;
+        var selectedEntry = await SelectEquipmentAsync(host, equipmentEntries, cancellationToken);
+        if (selectedEntry is null)
+        {
+            return StoryCommandResult.Jump(CancelStoryId);
+        }
+
+        var equipment = selectedEntry.Equipment;
 
         var affixGroups = EquipmentAffixGroups.Group(equipment.ExtraAffixes);
         var affixTexts = affixGroups
@@ -136,10 +136,28 @@ public sealed class EquipmentRefinementService
         equipment.ReplaceExtraAffixes(affixes);
     }
 
-    private string FormatEquipmentOption(EquipmentInstanceInventoryEntry entry)
+    private async ValueTask<EquipmentInstanceInventoryEntry?> SelectEquipmentAsync(
+        IRuntimeHost host,
+        IReadOnlyList<EquipmentInstanceInventoryEntry> equipmentEntries,
+        CancellationToken cancellationToken)
     {
-        var lines = AffixFormatter.FormatEquipmentLinesCn(entry.Equipment.ExtraAffixes, ContentRepository);
-        return $"{entry.Equipment.Definition.Name}：{string.Join("；", lines)}";
+        if (host is not IApplicationRuntimeHost applicationHost)
+        {
+            throw new InvalidOperationException("Equipment refinement requires an application runtime host.");
+        }
+
+        var selectedEntry = await applicationHost.SelectRefinementEquipmentAsync(equipmentEntries, cancellationToken);
+        if (selectedEntry is null)
+        {
+            return null;
+        }
+
+        if (!equipmentEntries.Contains(selectedEntry))
+        {
+            throw new InvalidOperationException("Refinement equipment selection returned an entry outside the candidate list.");
+        }
+
+        return selectedEntry;
     }
 
     private string FormatAffixGroup(IReadOnlyList<AffixDefinition> affixes)
