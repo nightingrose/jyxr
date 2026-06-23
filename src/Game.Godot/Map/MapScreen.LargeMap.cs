@@ -16,6 +16,9 @@ public partial class MapScreen
 	private const float LargeMapMinZoom = 1f;
 	private const float LargeMapMaxZoom = 3f;
 	private const float LargeMapZoomStep = 1.15f;
+	private const float LargeMapPinMovePixelsPerSecond = 900f;
+	private const float LargeMapPinMoveMinDuration = 0.25f;
+	private const float LargeMapPinMoveMaxDuration = 1.2f;
 	private static readonly Vector2 LargeMapWorldSize = new(LargeMapWorldWidth, LargeMapWorldHeight);
 
 	private SubViewportContainer _largeMapViewportContainer = null!;
@@ -31,6 +34,9 @@ public partial class MapScreen
 	private Vector2 _largeMapWorldSize = LargeMapWorldSize;
 	private MapEnterResult? _currentLargeMapResult;
 	private float _lastLargeMapPinchDistance;
+	private bool _isPlayingLargeMapMovement;
+	private bool _isDeferringLargeMapTimeLighting;
+	private bool _hasDeferredLargeMapTimeLighting;
 
 	private void InitializeLargeMapNodes()
 	{
@@ -97,6 +103,16 @@ public partial class MapScreen
 	}
 
 	private void ApplyLargeMapTimeLighting()
+	{
+		if (TryDeferLargeMapTimeLighting())
+		{
+			return;
+		}
+
+		ApplyLargeMapTimeLightingNow();
+	}
+
+	private void ApplyLargeMapTimeLightingNow()
 	{
 		if (!_largeMapBackground.Visible || _largeMapBackground.Texture is null)
 		{
@@ -194,7 +210,7 @@ public partial class MapScreen
 
 	private void HandleLargeMapGuiInput(InputEvent @event)
 	{
-		if (!_mapBigTab.Visible || _isStoryPresentationActive)
+		if (!_mapBigTab.Visible || _isStoryPresentationActive || _isPlayingLargeMapMovement)
 		{
 			ResetLargeMapInputState();
 			return;
@@ -452,5 +468,112 @@ public partial class MapScreen
 		}
 
 		return false;
+	}
+
+	private void BeginLargeMapTimeLightingDeferral()
+	{
+		if (!_mapBigTab.Visible)
+		{
+			return;
+		}
+
+		_isDeferringLargeMapTimeLighting = true;
+		_hasDeferredLargeMapTimeLighting = false;
+	}
+
+	private void EndLargeMapTimeLightingDeferral()
+	{
+		if (!_isDeferringLargeMapTimeLighting)
+		{
+			return;
+		}
+
+		var shouldApply = _hasDeferredLargeMapTimeLighting;
+		_isDeferringLargeMapTimeLighting = false;
+		_hasDeferredLargeMapTimeLighting = false;
+
+		if (shouldApply)
+		{
+			ApplyLargeMapTimeLightingNow();
+		}
+	}
+
+	private bool TryDeferLargeMapTimeLighting()
+	{
+		if (!_isDeferringLargeMapTimeLighting)
+		{
+			return false;
+		}
+
+		_hasDeferredLargeMapTimeLighting = true;
+		return true;
+	}
+
+	private async Task PlayLargeMapInteractionMovementAsync(MapMovementResult? movement)
+	{
+		try
+		{
+			await PlayLargeMapPinMoveAsync(movement);
+		}
+		finally
+		{
+			if (GodotObject.IsInstanceValid(this))
+			{
+				EndLargeMapTimeLightingDeferral();
+			}
+		}
+	}
+
+	private async Task PlayLargeMapPinMoveAsync(MapMovementResult? movement)
+	{
+		if (movement is null ||
+			!_mapBigTab.Visible ||
+			_currentLargeMapResult is null ||
+			!string.Equals(_currentLargeMapResult.Map.Id, movement.MapId, StringComparison.Ordinal))
+		{
+			return;
+		}
+
+		var from = MapSourceToWorldPosition(movement.From);
+		var to = MapSourceToWorldPosition(movement.To);
+		if (from.IsEqualApprox(to))
+		{
+			_mapPin.Position = to;
+			_currentLargeMapResult = _currentLargeMapResult with { HeroPosition = movement.To };
+			return;
+		}
+
+		ResetLargeMapInputState();
+		_isPlayingLargeMapMovement = true;
+		_mapPin.Position = from;
+
+		var duration = Mathf.Clamp(
+			from.DistanceTo(to) / LargeMapPinMovePixelsPerSecond,
+			LargeMapPinMoveMinDuration,
+			LargeMapPinMoveMaxDuration);
+		var positionTween = CreateTween();
+		positionTween.TweenProperty(_mapPin, "position", to, duration)
+			.SetTrans(Tween.TransitionType.Sine)
+			.SetEase(Tween.EaseType.InOut);
+
+		try
+		{
+			await ToSignal(positionTween, Tween.SignalName.Finished);
+		}
+		finally
+		{
+			if (GodotObject.IsInstanceValid(this))
+			{
+				_isPlayingLargeMapMovement = false;
+			}
+		}
+
+		if (!GodotObject.IsInstanceValid(this))
+		{
+			return;
+		}
+
+		_mapPin.Position = to;
+		_currentLargeMapResult = _currentLargeMapResult with { HeroPosition = movement.To };
 	}
 }

@@ -68,7 +68,8 @@ public sealed class MapService
             };
         }
 
-        var consumedTimeSlots = MoveHeroIfNeeded(location) + 1;
+        var movement = MoveHeroIfNeeded(location);
+        var consumedTimeSlots = movement.ConsumedTimeSlots + 1;
         State.Clock.AdvanceTimeSlots(1);
         _session.Events.Publish(new ClockChangedEvent());
 
@@ -77,7 +78,7 @@ public sealed class MapService
             location.EventIndex,
             BuildLocationEventKey(location.MapId, location.Location.Id, location.EventIndex));
 
-        return ResolveMapEvent(location.Event, consumedTimeSlots);
+        return ResolveMapEvent(location.Event, consumedTimeSlots, movement.Result);
     }
 
     public int PreviewInteractionConsumedTimeSlots((string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex) location)
@@ -132,7 +133,7 @@ public sealed class MapService
         return null;
     }
 
-    private int MoveHeroIfNeeded((string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex) location)
+    private (int ConsumedTimeSlots, MapMovementResult? Result) MoveHeroIfNeeded((string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex) location)
     {
         var consumedTimeSlots = CalculateMoveConsumedTimeSlots(location.MapId, location.Location);
         if (consumedTimeSlots > 0)
@@ -143,10 +144,17 @@ public sealed class MapService
         if (location.Location.Position is { } targetPosition &&
             ContentRepository.GetMap(location.MapId).Kind == MapKind.Large)
         {
+            var currentPosition = State.Location.TryGetLargeMapPosition(location.MapId, out var position)
+                ? position
+                : MapPosition.Zero;
             State.Location.SetLargeMapPosition(location.MapId, targetPosition);
+            var movement = currentPosition == targetPosition
+                ? null
+                : new MapMovementResult(location.MapId, currentPosition, targetPosition);
+            return (consumedTimeSlots, movement);
         }
 
-        return consumedTimeSlots;
+        return (consumedTimeSlots, null);
     }
 
     private int CalculateMoveConsumedTimeSlots(string mapId, MapLocationDefinition location)
@@ -163,7 +171,7 @@ public sealed class MapService
         return (int)(currentPosition.DistanceTo(targetPosition) / 10d);
     }
 
-    private MapInteractionResult ChangeMapFromEvent(string targetMapId, int consumedTimeSlots)
+    private MapInteractionResult ChangeMapFromEvent(string targetMapId, int consumedTimeSlots, MapMovementResult? movement)
     {
         var enterResult = EnterMap(targetMapId);
         return new MapInteractionResult
@@ -172,18 +180,19 @@ public sealed class MapService
             TargetId = targetMapId,
             ConsumedTimeSlots = consumedTimeSlots + enterResult.ConsumedTimeSlots,
             EnterResult = enterResult,
+            Movement = movement,
         };
     }
 
-    private MapInteractionResult ResolveMapEvent(MapEventDefinition mapEvent, int consumedTimeSlots) =>
+    private MapInteractionResult ResolveMapEvent(MapEventDefinition mapEvent, int consumedTimeSlots, MapMovementResult? movement) =>
         mapEvent.Type switch
         {
-            "map" => ChangeMapFromEvent(mapEvent.TargetId, consumedTimeSlots),
-            "story" => BuildInteractionResult(MapInteractionOutcome.StoryRequested, mapEvent, consumedTimeSlots),
-            "shop" => BuildInteractionResult(MapInteractionOutcome.ShopRequested, mapEvent, consumedTimeSlots),
-            "xiangzi" => BuildInteractionResult(MapInteractionOutcome.ChestRequested, mapEvent, consumedTimeSlots),
-            "battle" => BuildInteractionResult(MapInteractionOutcome.BattleRequested, mapEvent, consumedTimeSlots),
-            _ => BuildInteractionResult(MapInteractionOutcome.PlaceholderInteraction, mapEvent, consumedTimeSlots),
+            "map" => ChangeMapFromEvent(mapEvent.TargetId, consumedTimeSlots, movement),
+            "story" => BuildInteractionResult(MapInteractionOutcome.StoryRequested, mapEvent, consumedTimeSlots, movement),
+            "shop" => BuildInteractionResult(MapInteractionOutcome.ShopRequested, mapEvent, consumedTimeSlots, movement),
+            "xiangzi" => BuildInteractionResult(MapInteractionOutcome.ChestRequested, mapEvent, consumedTimeSlots, movement),
+            "battle" => BuildInteractionResult(MapInteractionOutcome.BattleRequested, mapEvent, consumedTimeSlots, movement),
+            _ => BuildInteractionResult(MapInteractionOutcome.PlaceholderInteraction, mapEvent, consumedTimeSlots, movement),
         };
 
     private void MarkEventCompletedIfNeeded(MapEventDefinition mapEvent, int eventIndex, string eventKey)
@@ -199,7 +208,8 @@ public sealed class MapService
     private static MapInteractionResult BuildInteractionResult(
         MapInteractionOutcome outcome,
         MapEventDefinition mapEvent,
-        int consumedTimeSlots)
+        int consumedTimeSlots,
+        MapMovementResult? movement)
     {
         return new MapInteractionResult
         {
@@ -207,6 +217,7 @@ public sealed class MapService
             Message = mapEvent.Description,
             TargetId = mapEvent.TargetId,
             ConsumedTimeSlots = consumedTimeSlots,
+            Movement = movement,
         };
     }
 
@@ -229,6 +240,12 @@ public sealed record MapInteractionResult
     public required MapService.MapInteractionOutcome Outcome { get; init; }
     public int ConsumedTimeSlots { get; init; }
     public MapEnterResult? EnterResult { get; init; }
+    public MapMovementResult? Movement { get; init; }
     public string? Message { get; init; }
     public string? TargetId { get; init; }
 }
+
+public sealed record MapMovementResult(
+    string MapId,
+    MapPosition From,
+    MapPosition To);

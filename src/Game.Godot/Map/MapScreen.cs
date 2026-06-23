@@ -202,7 +202,19 @@ public partial class MapScreen : Control
 
 	private async Task HandleLocationPressedAsync((string MapId, MapLocationDefinition Location, MapEventDefinition? Event, int EventIndex) location)
 	{
-		var result = Game.MapService.InteractWithLocation(location);
+		BeginLargeMapTimeLightingDeferral();
+		MapInteractionResult result;
+		try
+		{
+			result = Game.MapService.InteractWithLocation(location);
+		}
+		catch
+		{
+			EndLargeMapTimeLightingDeferral();
+			throw;
+		}
+
+		await PlayLargeMapInteractionMovementAsync(result.Movement);
 		await HandleMapInteractionResultAsync(result);
 	}
 
