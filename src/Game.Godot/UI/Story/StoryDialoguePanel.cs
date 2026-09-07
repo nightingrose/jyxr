@@ -6,7 +6,6 @@ namespace Game.Godot.UI.Story;
 public partial class StoryDialoguePanel : Control
 {
 	private const double TypewriterCharactersPerSecond = 36d;
-	private static bool _skipMode;
 	private TaskCompletionSource<bool>? _completionSource;
 	private string _speaker = string.Empty;
 	private string _text = string.Empty;
@@ -27,8 +26,7 @@ public partial class StoryDialoguePanel : Control
 		_contentLabel = GetNode<RichTextLabel>("%ContentLabel");
 		_skipButton = GetNode<Button>("%SkipButton");
 
-		_skipButton.ButtonDown += OnSkipButtonDown;
-		_skipButton.ButtonUp += OnSkipButtonUp;
+		_skipButton.Pressed += Complete;
 		SetProcess(false);
 		Apply();
 	}
@@ -103,11 +101,6 @@ public partial class StoryDialoguePanel : Control
 		}
 
 		using var registration = cancellationToken.Register(() => _completionSource.TrySetCanceled(cancellationToken));
-		if (_skipMode)
-		{
-			return;
-		}
-
 		if (Input.IsActionPressed("ui-ctrl"))
 		{
 			await ToSignal(GetTree().CreateTimer(0.1d), SceneTreeTimer.SignalName.Timeout);
@@ -198,17 +191,6 @@ public partial class StoryDialoguePanel : Control
 	{
 		RevealFullText();
 		_completionSource?.TrySetResult(true);
-	}
-
-	private void OnSkipButtonDown()
-	{
-		_skipMode = true;
-		Complete();
-	}
-
-	private static void OnSkipButtonUp()
-	{
-		_skipMode = false;
 	}
 
 	public void HidePanel()
